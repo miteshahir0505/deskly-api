@@ -1,0 +1,32 @@
+$kind: http-request
+method: POST
+url: http://localhost:4000/bookings
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201 or 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201, 409]);
+      });
+
+      pm.test("Response body matches status", function () {
+          const jsonData = pm.response.json();
+          if (pm.response.code === 201) {
+              pm.expect(jsonData).to.have.property('id');
+          } 
+          else if (pm.response.code === 409) {
+              pm.expect(jsonData).to.have.property('error');
+              pm.expect(jsonData).to.have.property('message');
+          }
+      });
+    language: text/javascript
+order: 5000
+headers:
+  X-API-Key: demo-key
+body:
+  type: json
+  content: |-
+    {
+      "deskId": "desk-2",
+      "date": "2026-12-11",
+      "bookedBy": "rob@example.com"
+    }
